@@ -1,0 +1,125 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  CASHIER
+  TECHNICIAN
+}
+
+enum RepairStatus {
+  RECEIVED
+  DIAGNOSIS
+  PROGRESS
+  QC
+  READY
+  DELIVERED
+}
+
+model User {
+  id               String           @id @default(cuid())
+  name             String
+  email            String           @unique
+  password         String?
+  role             Role             @default(TECHNICIAN)
+  repairTickets    RepairTicket[]   @relation("TechnicianTickets")
+  posTransactions  PosTransaction[] @relation("CashierTransactions")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Customer {
+  id            String         @id @default(cuid())
+  name          String
+  phone         String
+  address       String?
+  repairTickets RepairTicket[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model RepairTicket {
+  id           String           @id @default(cuid())
+  ticketNo     String           @unique
+  customerId   String
+  customer     Customer         @relation(fields: [customerId], references: [id])
+  deviceBrand  String
+  deviceModel  String
+  imeiSn       String?
+  passcode     String?
+  complaint    String
+  status       RepairStatus     @default(RECEIVED)
+  estCost        Float            @default(0)
+  downPayment    Float            @default(0)
+  laborCost      Float            @default(0)
+  totalCost      Float            @default(0)
+  diagnosisNotes String?
+  technicianId   String?
+  technician     User?            @relation("TechnicianTickets", fields: [technicianId], references: [id])
+  partsUsed      RepairPartUsed[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model Sparepart {
+  id            String           @id @default(cuid())
+  sku           String           @unique
+  name          String
+  brand         String
+  buyPrice      Float
+  sellPrice     Float
+  stock         Int
+  minStockAlert Int              @default(5)
+  partsUsed     RepairPartUsed[]
+  posItems      PosItem[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model RepairPartUsed {
+  id             String       @id @default(cuid())
+  repairTicketId String
+  repairTicket   RepairTicket @relation(fields: [repairTicketId], references: [id], onDelete: Cascade)
+  sparepartId    String
+  sparepart      Sparepart    @relation(fields: [sparepartId], references: [id])
+  quantity       Int
+  price          Float
+}
+
+model PosTransaction {
+  id            String    @id @default(cuid())
+  invoiceNo     String    @unique
+  cashierId     String
+  cashier       User      @relation("CashierTransactions", fields: [cashierId], references: [id])
+  totalAmount   Float
+  paymentMethod  String
+  repairTicketId String?
+  createdAt      DateTime  @default(now())
+  items          PosItem[]
+}
+
+model PosItem {
+  id            String         @id @default(cuid())
+  transactionId String
+  transaction   PosTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  sparepartId   String
+  sparepart     Sparepart      @relation(fields: [sparepartId], references: [id])
+  quantity      Int
+  unitPrice     Float
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  description String
+  amount      Float
+  category    String
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
