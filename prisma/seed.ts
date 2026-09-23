@@ -10,17 +10,15 @@ function hashPassword(password: string): string {
 }
 
 async function main() {
-  console.log("Seeding database...");
+  console.log("Checking database initialization...");
 
-  // Clean existing data
-  await prisma.repairPartUsed.deleteMany();
-  await prisma.posItem.deleteMany();
-  await prisma.posTransaction.deleteMany();
-  await prisma.repairTicket.deleteMany();
-  await prisma.customer.deleteMany();
-  await prisma.sparepart.deleteMany();
-  await prisma.expense.deleteMany();
-  await prisma.user.deleteMany();
+  const existingUser = await prisma.user.findFirst();
+  if (existingUser) {
+    console.log("Database already initialized with user records. Skipping seed.");
+    return;
+  }
+
+  console.log("Fresh database detected. Seeding initial admin and demo data...");
 
   // 1. Create 1 Admin User
   const adminUser = await prisma.user.create({

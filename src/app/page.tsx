@@ -113,10 +113,24 @@ const WORKFLOW_STEPS = [
 ];
 
 export default async function LandingPage() {
-  const spareparts = await prisma.sparepart.findMany({
-    take: 6,
-    orderBy: { stock: "desc" },
-  });
+  let spareparts: Array<{
+    id: string;
+    sku: string;
+    name: string;
+    brand: string;
+    buyPrice: number;
+    sellPrice: number;
+    stock: number;
+  }> = [];
+
+  try {
+    spareparts = await prisma.sparepart.findMany({
+      take: 6,
+      orderBy: { stock: "desc" },
+    });
+  } catch (err) {
+    console.error("Landing page spareparts query fallback:", err);
+  }
 
 
   return (
