@@ -15,9 +15,11 @@ export async function GET() {
   const envInfo = {
     hasDatabaseUrl: !!process.env.DATABASE_URL,
     maskedDatabaseUrl: maskUrl(process.env.DATABASE_URL),
-    hasPostgresPrismaUrl: !!process.env.POSTGRES_PRISMA_URL,
-    maskedPostgresPrismaUrl: maskUrl(process.env.POSTGRES_PRISMA_URL),
     hasPostgresUrl: !!process.env.POSTGRES_URL,
+    maskedPostgresUrl: maskUrl(process.env.POSTGRES_URL),
+    hasPrismaDatabaseUrl: !!process.env.PRISMA_DATABASE_URL,
+    maskedPrismaDatabaseUrl: maskUrl(process.env.PRISMA_DATABASE_URL),
+    hasPostgresPrismaUrl: !!process.env.POSTGRES_PRISMA_URL,
     hasAuthSecret: !!process.env.AUTH_SECRET,
     nodeEnv: process.env.NODE_ENV,
   };
